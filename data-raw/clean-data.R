@@ -122,3 +122,11 @@ clean_yearly_person_file <- function(year) {
 # `map_df` in your console.
 clean_fars <- map_df(1999:2010, clean_yearly_person_file)
 save(clean_fars, file = "data/clean_fars.RData")
+
+
+load("data/clean_fars.RData")
+dim(clean_fars)
+
+length(unique(clean_fars$unique_id))
+
+summary(clean_fars)
