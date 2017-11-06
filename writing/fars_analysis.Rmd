@@ -32,9 +32,24 @@ clean_fars %>%
 ```
 
 ```{r}
-clean_fars %>%
-  summarise( = ifelse(State == "WI" & Name == "John_Smith", "John_Smith1", Name))
-  group_by(agecat) %>%
-  ggplot(aes(x = year, y = ))
+fars_nums <- clean_fars %>%
+             filter(!as.character(drug_type) %in% "Alcohol") %>%
+             group_by(year) %>%
+             distinct(unique_id) %>%
+             summarise(num_in_year = n())
+
+fars_for_plot <- left_join(clean_fars, fars_nums, by = "year") %>%
+                 filter(agecat != is.na(agecat),
+                        #drug_type != "Alcohol",
+                        positive_for_drug == TRUE) %>%
+                 group_by(agecat, year)
+
+fars_for_plot <- summarise(fars_for_plot, number_drugs = n())
+
+fars_for_plot <- left_join(fars_for_plot, fars_nums, by = "year")
+fars_for_plot <- mutate(fars_for_plot, percentage_drugs = number_drugs/num_in_year *100)
+
+ggplot(fars_for_plot, aes(x = year, y = percentage_drugs, shape = agecat)) +
+  geom_point()
 ```
 
