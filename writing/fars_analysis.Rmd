@@ -85,4 +85,13 @@ ggplot(fars_nums3, aes(x = year, y = perc_positive, shape = agecat)) +
   geom_point() +
   geom_line()
 ```
+```{r}
+drug_list <- c("Alcohol", "Nonalcohol", "Narcotic", "Depressant",
+"Stimulant", "Cannabinoid", "Other")
+drug_trend_tests_ca <- lapply(drug_list, test_trend_ca)
+drug_trend_tests_ca <- dplyr::bind_rows(drug_trend_tests_ca) %>%
+dplyr::mutate(drug = drug_list) %>%
+dplyr::select(drug, Z, p.value)
+drug_trend_tests_ca %>% knitr::kable()
+```
 

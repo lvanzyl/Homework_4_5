@@ -23,7 +23,7 @@ perc_cis <- function(x, n) {
 # x, a vector with the number of drivers testing positive in each year
 # n, a vector with the total number of non-missing observations in each year
 
-test_trend_ca <- function(data = clean_fars, drug){
+test_trend_ca <- function(drug, data = clean_fars){
   
   if (drug == "Nonalcohol") {
   simple_fars2 <- data %>%
@@ -40,7 +40,7 @@ test_trend_ca <- function(data = clean_fars, drug){
                                 n = simple_fars2$trials)
   
   ca_result <- as_tibble(data.frame(Z = round(sqrt(ca_result1$statistic), 1),
-                                      p_value = round(ca_result1$p.value, 3)))
+                                      p.value = round(ca_result1$p.value, 3)))
 
   }
   
@@ -56,7 +56,7 @@ test_trend_ca <- function(data = clean_fars, drug){
                                n = simple_fars$trials)
   
   ca_result <- as_tibble(data.frame(Z = round(sqrt(ca_result2$statistic), 1),
-                                    p_value = round(ca_result2$p.value, 3)))
+                                    p.value = round(ca_result2$p.value, 3)))
   
   } 
   
@@ -65,9 +65,6 @@ test_trend_ca <- function(data = clean_fars, drug){
   
 }
 
+#function 3
 
-test_trend_ca(drug = "Alcohol")
-
-
-test_trend_ca(drug = "Stimulant", data = clean_fars)
 test_trend_ca(drug = "Nonalcohol")
