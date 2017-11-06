@@ -1,5 +1,4 @@
 library(tidyverse)
-library(readr)
 
 setwd("C:/Users/Lizette/Documents/Masters/R_Programming_Fall_2017/Homework/Homework_4_5")
 
@@ -123,7 +122,7 @@ clean_yearly_person_file <- function(year) {
 clean_fars <- map_df(1999:2010, clean_yearly_person_file)
 save(clean_fars, file = "data/clean_fars.RData")
 
-
+# load and check the cleaned data
 load("data/clean_fars.RData")
 dim(clean_fars)
 

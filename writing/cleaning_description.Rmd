@@ -4,7 +4,13 @@ author: "Lizette van Zyl"
 date: "October 25, 2017"
 output: word_document
 ---
+## Questions about Brady and Li Paper
 
+1. The observational unit of this article was deaths that resulted within 1 hour
+of getting into an accident. The file that contains this information within the
+yearly zipped file is the "person" data file.
+
+2. 
 ```{r}
 clean_yearly_person_file <- function(year) {
 # 1. Read data in.
@@ -126,3 +132,4 @@ clean_fars <- map_df(1999:2010, clean_yearly_person_file)
 save(clean_fars, file = "data/clean_fars.RData")
 ```
 
+1. 
