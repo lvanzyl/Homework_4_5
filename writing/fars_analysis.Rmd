@@ -7,6 +7,7 @@ output: word_document
 ```{r}
 library(tidyverse)
 library(ggplot2)
+library(ggthemes)
 ```
 
 ```{r}
@@ -36,67 +37,52 @@ clean_fars %>%
 fars_nums <- clean_fars %>%
              filter(!as.character(drug_type) %in% "Alcohol",
              !is.na(agecat)) %>%
-             group_by(year) %>%
-             distinct(unique_id) %>%
-             summarise(num_in_year = n())
+             group_by(year, agecat, unique_id) %>%
+             summarize(positive_test = any(positive_for_drug, na.rm = TRUE)) %>%
+                       # n_non_missing = sum(!is.na(positive_for_drug)),
+                       #positive_test = sum(positive_for_drug, na.rm = TRUE),
+             ungroup() %>%
+             group_by(year, agecat) %>%
+             summarise(perc_positive = mean(positive_test)*100)
+                    # round(100 * positive_test / n_non_missing, 1)) %>%
+             # summarize(perc_positive = sum(perc_positive))
 
-fars_for_plot <- left_join(clean_fars, fars_nums, by = "year") %>%
-                 filter(positive_for_drug == TRUE) %>%
-                               # drug_type != "Alcohol") %>%
-                 group_by(agecat, year)
-
-fars_for_plot <- summarise(fars_for_plot, number_drugs = n())
-
-fars_for_plot <- left_join(fars_for_plot, fars_nums, by = "year")
-fars_for_plot <- mutate(fars_for_plot, percentage_drugs = number_drugs/num_in_year *100)
-
-ggplot(fars_for_plot, aes(x = year, y = percentage_drugs, shape = agecat)) +
-  geom_point()
+ggplot(fars_nums, aes(x = year, y = perc_positive, shape = agecat)) +
+  geom_point() +
+  geom_line()+
+  theme_bw() +
+  scale_y_continuous(limits = c(0, 30))
+  
 ```
 
 ```{r}
 # second plot
 fars_nums2 <- clean_fars %>%
              filter(!as.character(drug_type) %in% "Alcohol") %>%
-             group_by(year) %>%
-             distinct(unique_id) %>%
-             summarise(num_in_year = n())
+             group_by(year, drug_type) %>%
+             summarize(n_non_missing = sum(!is.na(positive_for_drug)),
+                       positive_test = sum(positive_for_drug, na.rm = TRUE),
+                       perc_positive = round(100 * positive_test / n_non_missing, 1))
 
-fars_for_plot2 <- left_join(clean_fars, fars_nums2, by = "year") %>%
-                 filter(agecat != is.na(agecat),
-                        drug_type != "Alcohol",
-                        positive_for_drug == TRUE) %>%
-                 group_by(drug_type, year)
-
-fars_for_plot2 <- summarise(fars_for_plot2, number_drugs = n())
-
-fars_for_plot2 <- left_join(fars_for_plot2, fars_nums2, by = "year")
-fars_for_plot2 <- mutate(fars_for_plot2, percentage_drugs = number_drugs/num_in_year *100)
-
-ggplot(fars_for_plot2, aes(x = year, y = percentage_drugs, shape = drug_type)) +
-  geom_point()
+ggplot(fars_nums2, aes(x = year, y = perc_positive, shape = drug_type)) +
+  geom_point() +
+  geom_line()
 ```
+
 ```{r}
-# second plot
+# plot 3
 fars_nums3 <- clean_fars %>%
-             filter(!as.character(drug_type) %in% "Alcohol") %>%
-             group_by(year) %>%
-             distinct(unique_id) %>%
-             summarise(num_in_year = n())
+             filter(as.character(drug_type) %in% "Cannabinoid",
+                    !is.na(agecat)) %>%
+             group_by(year, agecat) %>%
+             # distinct(unique_id) %>%
+             summarize(n_non_missing = sum(!is.na(positive_for_drug)),
+                       positive_test = sum(positive_for_drug, na.rm = TRUE),
+                       perc_positive = round(100 * positive_test / n_non_missing, 1)) 
 
-fars_for_plot3 <- left_join(clean_fars, fars_nums3, by = "year") %>%
-                 filter(agecat != is.na(agecat),
-                        drug_type != "Alcohol",
-                        positive_for_drug == TRUE) %>%
-                 group_by(drug_type, year, agecat)
 
-fars_for_plot3 <- summarise(fars_for_plot3, number_drugs = n())
-
-fars_for_plot3 <- left_join(fars_for_plot3, fars_nums, by = "year")
-fars_for_plot3 <- mutate(fars_for_plot3, percentage_drugs = number_drugs/num_in_year *100) %>%
-                  filter(drug_type == "Cannabinoid")
-
-ggplot(fars_for_plot3, aes(x = year, y = percentage_drugs, shape = agecat)) +
-  geom_point()
+ggplot(fars_nums3, aes(x = year, y = perc_positive, shape = agecat)) +
+  geom_point() +
+  geom_line()
 ```
 
