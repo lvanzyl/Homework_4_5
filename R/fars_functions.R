@@ -29,6 +29,9 @@ test_trend_ca <- function(data = clean_fars, drug){
   simple_fars2 <- data %>%
     mutate(drug_type = as.character(drug_type)) %>%
     filter(drug_type != "Alcohol") %>%
+    group_by(unique_id, year) %>%
+    summarize(positive_for_drug = any(positive_for_drug)) %>%
+    ungroup() %>%
     group_by(year) %>%
     summarize(positive = sum(positive_for_drug, na.rm = TRUE),
               trials = sum(!is.na(positive_for_drug)))
