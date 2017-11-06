@@ -99,3 +99,4 @@ fars_for_plot3 <- mutate(fars_for_plot3, percentage_drugs = number_drugs/num_in_
 ggplot(fars_for_plot3, aes(x = year, y = percentage_drugs, shape = agecat)) +
   geom_point()
 ```
+
