@@ -32,16 +32,17 @@ clean_fars %>%
 ```
 
 ```{r}
+# first plot
 fars_nums <- clean_fars %>%
-             filter(!as.character(drug_type) %in% "Alcohol") %>%
+             filter(!as.character(drug_type) %in% "Alcohol",
+             !is.na(agecat)) %>%
              group_by(year) %>%
              distinct(unique_id) %>%
              summarise(num_in_year = n())
 
 fars_for_plot <- left_join(clean_fars, fars_nums, by = "year") %>%
-                 filter(agecat != is.na(agecat),
-                        #drug_type != "Alcohol",
-                        positive_for_drug == TRUE) %>%
+                 filter(positive_for_drug == TRUE) %>%
+                               # drug_type != "Alcohol") %>%
                  group_by(agecat, year)
 
 fars_for_plot <- summarise(fars_for_plot, number_drugs = n())
@@ -53,3 +54,48 @@ ggplot(fars_for_plot, aes(x = year, y = percentage_drugs, shape = agecat)) +
   geom_point()
 ```
 
+```{r}
+# second plot
+fars_nums2 <- clean_fars %>%
+             filter(!as.character(drug_type) %in% "Alcohol") %>%
+             group_by(year) %>%
+             distinct(unique_id) %>%
+             summarise(num_in_year = n())
+
+fars_for_plot2 <- left_join(clean_fars, fars_nums2, by = "year") %>%
+                 filter(agecat != is.na(agecat),
+                        drug_type != "Alcohol",
+                        positive_for_drug == TRUE) %>%
+                 group_by(drug_type, year)
+
+fars_for_plot2 <- summarise(fars_for_plot2, number_drugs = n())
+
+fars_for_plot2 <- left_join(fars_for_plot2, fars_nums2, by = "year")
+fars_for_plot2 <- mutate(fars_for_plot2, percentage_drugs = number_drugs/num_in_year *100)
+
+ggplot(fars_for_plot2, aes(x = year, y = percentage_drugs, shape = drug_type)) +
+  geom_point()
+```
+```{r}
+# second plot
+fars_nums3 <- clean_fars %>%
+             filter(!as.character(drug_type) %in% "Alcohol") %>%
+             group_by(year) %>%
+             distinct(unique_id) %>%
+             summarise(num_in_year = n())
+
+fars_for_plot3 <- left_join(clean_fars, fars_nums3, by = "year") %>%
+                 filter(agecat != is.na(agecat),
+                        drug_type != "Alcohol",
+                        positive_for_drug == TRUE) %>%
+                 group_by(drug_type, year, agecat)
+
+fars_for_plot3 <- summarise(fars_for_plot3, number_drugs = n())
+
+fars_for_plot3 <- left_join(fars_for_plot3, fars_nums, by = "year")
+fars_for_plot3 <- mutate(fars_for_plot3, percentage_drugs = number_drugs/num_in_year *100) %>%
+                  filter(drug_type == "Cannabinoid")
+
+ggplot(fars_for_plot3, aes(x = year, y = percentage_drugs, shape = agecat)) +
+  geom_point()
+```
