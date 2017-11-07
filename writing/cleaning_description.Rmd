@@ -13,7 +13,8 @@ yearly zipped file is the "person" data file.
 2. Li and Brady constrained their data to the following:
 
 - st_case:
-- veh_no:
+- veh_no: 
+- inj_sev: injury severity
 ```{r}
 clean_yearly_person_file <- function(year) {
 # 1. Read data in.
@@ -135,4 +136,15 @@ clean_fars <- map_df(1999:2010, clean_yearly_person_file)
 save(clean_fars, file = "data/clean_fars.RData")
 ```
 
-1. 
+1. A .csv file with raw FARS data for each year is saved in the “data-raw/yearly_person_data” directory as “person_[year].csv”. Since the working directory is the project directory, the person_file object gives the path to the raw data file for whatever year is entered in the year argument of the function. The raw data for a year is read into R with the read_csv function, which reads in a comma separated file as a tibble in R. The function takes the file path (person_file) as its first argument, and the raw data frame is saved as an object called df.
+
+2.To reduce the issues that accompany upper/lower case matching for manipulation of the dataframe,
+change all the column names in the original dataframe to lowercase letter.
+
+3. Reduce the number of columns (variables) that the data manipulation has to handle. Do this by selecting only the columns related to driver deaths within 1 hour of an accident in the 6 states that the analysis considers, as well as unique identification for the person, drug and alcohol test results, and timestamp information.
+
+4. Limit severity of injury to "fatal injury" and limit the person type to those who were inside the vehicle (driving) only, excluding people that died as a result of being hit by a car/vehicle. After limiting the scope of the person and injury data, these two variables are removed from the dataset to simplify the later analysis, since there is only one "level" now for each of these, and there is no need to have the information repeated across all the other variables.
+
+5. 
+
+5. 
