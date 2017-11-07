@@ -1,9 +1,14 @@
 ---
-title: "fars_analysis"
+title: "Reproduced analysis of FARS data"
 author: "Lizette van Zyl"
 date: "October 25, 2017"
 output: word_document
 ---
+```{r global_options, echo = FALSE, message = FALSE, warning = FALSE}
+ knitr::opts_chunk$set(echo = FALSE, message = FALSE, warning = FALSE)
+
+```
+
 ```{r}
 library(tidyverse)
 library(ggplot2)
@@ -12,6 +17,10 @@ library(ggthemes)
 load("../data/clean_fars.RData")
 source("../R/fars_functions.R")
 ```
+
+##Results
+
+Percentages of drivers testing positive by drug type, sex, and year group
 
 ```{r}
 # table of clean-fars data
@@ -35,6 +44,8 @@ clean_fars %>%
                              "M 2007-2010"))
 ```
 
+Figure 1: Prevalence of nonalcohol drugs in fatally injured drivers by year and age group
+
 ```{r}
 # first plot
 fars_nums <- clean_fars %>%
@@ -53,10 +64,12 @@ fars_nums <- clean_fars %>%
 ggplot(fars_nums, aes(x = year, y = perc_positive, shape = agecat)) +
   geom_point() +
   geom_line()+
-  theme_bw() +
+  theme_few() +
   scale_y_continuous(limits = c(0, 30))
   
 ```
+
+Figure 2: Prevalence of nonalcohol drugs in fatally injured drivers by year and drug type
 
 ```{r}
 # second plot
@@ -69,8 +82,11 @@ fars_nums2 <- clean_fars %>%
 
 ggplot(fars_nums2, aes(x = year, y = perc_positive, shape = drug_type)) +
   geom_point() +
-  geom_line()
+  geom_line() +
+  theme_few()
 ```
+
+Figure 3: Prevalence of cannabinoid drugs in fatally injured drivers by year and age group
 
 ```{r}
 # plot 3
@@ -86,8 +102,30 @@ fars_nums3 <- clean_fars %>%
 
 ggplot(fars_nums3, aes(x = year, y = perc_positive, shape = agecat)) +
   geom_point() +
-  geom_line()
+  geom_line() +
+  theme_few()
 ```
+
+Prevalence of drugs in fatally injured drivers for 1999 and 2010 by drug type
+
+```{r}
+fars_for_table <- clean_fars %>%
+             filter(year == c(1999, 2010)) %>%
+             group_by(year, drug_type) %>%
+             rename("Drug type" = drug_type) %>%
+             summarize(n_non_missing = sum(!is.na(positive_for_drug)),
+                       positive_test = sum(positive_for_drug, na.rm = TRUE)) %>%
+             mutate(test_stat = perc_cis(x = positive_test, n = n_non_missing)) %>%
+             select(-n_non_missing, -positive_test) %>%
+             spread(key = year, value = test_stat) %>%
+             knitr::kable()
+   
+fars_for_table          
+```
+
+Statistics for testing for trend in prevalence of drugs over study years by drug type using
+Cochran-Armitage trend test
+
 ```{r}
 drug_list <- c("Alcohol", "Nonalcohol", "Narcotic", "Depressant",
 "Stimulant", "Cannabinoid", "Other")
@@ -97,6 +135,10 @@ dplyr::mutate(drug = drug_list) %>%
 dplyr::select(drug, Z, p.value)
 drug_trend_tests_ca %>% knitr::kable()
 ```
+
+Statistics for testing for trend in prevalence of drugs over study years by drug type using Wald
+test of logistic regression coefficient for “year”
+
 ```{r}
 drug_list <- c("Alcohol", "Nonalcohol", "Narcotic", "Depressant",
 "Stimulant", "Cannabinoid", "Other")
