@@ -10,11 +10,25 @@ output: word_document
 of getting into an auto accident. The file that contains this information within the
 yearly zipped file is the "person" data file.
 
+2. This study only analyzes a subset of the available FARS data. Enumerate all of the constraints that are used by the study to create the subset of data they use in their study (e.g., years, states, person type, injury type). Go through the FARS documentation and provide the variable names for the variables you will use to create filter statements in R to limit the data to this subset. Provide the values that you will want to keep from each variable.
+
+
+
 2. Li and Brady constrained their data to the following:
+
+- only drivers that died within an hour of the accident
+- only six states that performed toxicological tests on more than 80% of the fatally injured     drivers: California, Hawaii, Illinois, New Hampshire, Rhode Island, and West Virginia
+- only drivers that died between January 1, 1999 and December 31, 2010
 
 - st_case:
 - veh_no: 
 - inj_sev: injury severity
+- alc_res: measured alcohol blood level
+- lag_hrs: how many hours after the accident the person died
+- lag_mins: how many minutes after the number of lag_hrs a person died
+
+3. The study gives results stratified by age category, year, year category (e.g., 1999–2002), alcohol level, non-alcohol drug category, and sex. For each of these stratifications, give the variable name for the FARS variable you could use to make the split (i.e., the column name you would use in a group_by statement to create summaries within each category or the column name you would mutate to generate a categorical variable). Describe how each of these variables are coded in the data. Are there any values for missing data that you’ll need to mutate to NA values in R? Are there any cases where coding has changed over the study period?
+
 ```{r}
 clean_yearly_person_file <- function(year) {
 # 1. Read data in.
@@ -145,6 +159,11 @@ change all the column names in the original dataframe to lowercase letter.
 
 4. Limit severity of injury to "fatal injury" and limit the person type to those who were inside the vehicle (driving) only, excluding people that died as a result of being hit by a car/vehicle. After limiting the scope of the person and injury data, these two variables are removed from the dataset to simplify the later analysis, since there is only one "level" now for each of these, and there is no need to have the information repeated across all the other variables.
 
-5. 
+5. Pull the entries for unique_id, st_case, veh_no, and per_no into one column to create a unique id for every person included in the analysis. After this, mutate the data so that year remains as a column, and also paste together the year into the unique_id column with a "_" between the numbers entry to create a completely unique id for each person in the analysis.
 
-5. 
+6. Filter down the data so that only people killed in one of 6 states is included. According to their corresponding state number codes, the states included in this analysis are: California,
+Hawaii, Illinois, New Hampshire, Rhode Island, and West Virginia. These were states that performed toxicological testing on more than 80% of their fatally injured drivers. The state column was then removed, since none of the analysis was done by individual state in the Brady and Li study.
+
+7. First mutate the  sex column so that any entries with a value of 9 and actually NA values, but that if the entry is not equal to 9, just keep the original entry. After this, say that the entries in this column correspond to two levels, 1 and 2, and then label these two levels as "Male" and "Female" accordingly.
+
+7. 
