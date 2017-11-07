@@ -19,10 +19,6 @@ perc_cis <- function(x, n) {
 }
 
 # second function
-
-# x, a vector with the number of drivers testing positive in each year
-# n, a vector with the total number of non-missing observations in each year
-
 test_trend_ca <- function(drug, data = clean_fars){
   
   if (drug == "Nonalcohol") {
@@ -67,4 +63,46 @@ test_trend_ca <- function(drug, data = clean_fars){
 
 #function 3
 
-test_trend_ca(drug = "Nonalcohol")
+test_trend_log_reg <- function(drug, data = clean_fars){
+  
+  if (drug == "Nonalcohol") {
+    simple_fars2 <- data %>%
+      mutate(drug_type = as.character(drug_type)) %>%
+      filter(drug_type != "Alcohol") %>%
+      group_by(unique_id, year) %>%
+      summarize(positive_for_drug = any(positive_for_drug)) %>%
+      ungroup()
+    
+    log_reg <- glm(positive_for_drug ~ year, data = simple_fars2,
+                   family = binomial(link = "logit"))
+    
+    trend_sum <- as_tibble(data.frame(summary(log_reg)$coefficients))
+    
+    trend_sum <- select(trend_sum, 3, 4) %>%
+                 slice(-1) %>%
+                 rename(Z = z.value, p.value = Pr...z..) %>%
+                 mutate(Z = round(Z, 1), p.value = round(p.value, 3))
+  }
+  
+  else {
+    simple_fars <- data %>%
+      mutate(drug_type = as.character(drug_type)) %>%
+      filter(drug_type == drug)
+      
+      log_reg <- glm(positive_for_drug ~ year, data = simple_fars,
+                    family = binomial(link = "logit"))
+    
+    trend_sum <- as_tibble(data.frame(summary(log_reg)$coefficients))
+    
+    trend_sum <- select(trend_sum, 3, 4) %>%
+                 slice(-1) %>%
+                 rename(Z = z.value, p.value = Pr...z..) %>%
+                 mutate(Z = round(Z, 1), p.value = round(p.value, 3))
+    
+  } 
+  
+  row.names(trend_sum) <- NULL
+  return(trend_sum)
+}
+
+test_trend_log_reg(drug = "Nonalcohol")
