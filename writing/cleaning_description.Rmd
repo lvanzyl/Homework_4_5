@@ -13,6 +13,7 @@ yearly zipped file is the "person" data file.
 2. Li and Brady constrained their data to the following:
 
 - st_case:
+- veh_no:
 ```{r}
 clean_yearly_person_file <- function(year) {
 # 1. Read data in.
