@@ -8,6 +8,9 @@ output: word_document
 library(tidyverse)
 library(ggplot2)
 library(ggthemes)
+
+load("../data/clean_fars.RData")
+source("../R/fars_functions.R")
 ```
 
 ```{r}
@@ -93,5 +96,17 @@ drug_trend_tests_ca <- dplyr::bind_rows(drug_trend_tests_ca) %>%
 dplyr::mutate(drug = drug_list) %>%
 dplyr::select(drug, Z, p.value)
 drug_trend_tests_ca %>% knitr::kable()
+```
+```{r}
+drug_list <- c("Alcohol", "Nonalcohol", "Narcotic", "Depressant",
+"Stimulant", "Cannabinoid", "Other")
+
+drug_trend_tests_log_reg <- lapply(drug_list, test_trend_log_reg)
+
+drug_trend_tests_log_reg <- dplyr::bind_rows(drug_trend_tests_log_reg) %>%
+                            dplyr::mutate(drug = drug_list) %>%
+                            dplyr::select(drug, Z, p.value)
+
+drug_trend_tests_log_reg %>% knitr::kable()
 ```
 

@@ -104,5 +104,3 @@ test_trend_log_reg <- function(drug, data = clean_fars){
   row.names(trend_sum) <- NULL
   return(trend_sum)
 }
-
-test_trend_log_reg(drug = "Nonalcohol")
