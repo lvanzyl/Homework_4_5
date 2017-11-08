@@ -6,7 +6,7 @@ output: word_document
 ---
 ## Questions about Brady and Li Paper
 
-1. The observational unit of this article was vehicle driver deaths that resulted within 1 hour
+1. The observational unit of this article was vehicle drivers whose deaths resulted within 1 hour
 of getting into an auto accident. The file that contains this information within the
 yearly zipped file is the "person" data file.
 
