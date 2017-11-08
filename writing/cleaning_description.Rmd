@@ -4,6 +4,7 @@ author: "Lizette van Zyl"
 date: "October 25, 2017"
 output: word_document
 ---
+
 ## Questions about Brady and Li Paper
 
 1. The observational unit of this article was vehicle drivers whose deaths resulted within 1 hour
@@ -35,13 +36,13 @@ To limit the years, files were only taken from the zip files for the 12 years in
 
 Note that year does not have coding within the person file, but rather the year is part of the zip file name and can be input into the dataframe through the function.
 
-```{r}
+```{r eval = FALSE, echo = FALSE}
 library(purrr)
 library(tidyverse)
 ```
 
 
-```{r}
+```{r eval = FALSE, echo = FALSE}
 clean_yearly_person_file <- function(year) {
 # 1. Read data in.
 person_file <- paste0("data-raw/yearly_person_data/person_", year, ".csv")
@@ -162,10 +163,12 @@ clean_fars <- map_df(1999:2010, clean_yearly_person_file)
 save(clean_fars, file = "data/clean_fars.RData")
 ```
 
+## Extra explanations for each of the comments in the cleaning code:
+
 1. A .csv file with raw FARS data for each year is saved in the “data-raw/yearly_person_data” directory as “person_[year].csv”. Since the working directory is the project directory, the person_file object gives the path to the raw data file for whatever year is entered in the year argument of the function. The raw data for a year is read into R with the read_csv function, which reads in a comma separated file as a tibble in R. The function takes the file path (person_file) as its first argument, and the raw data frame is saved as an object called df.
 
-2.To reduce the issues that accompany upper/lower case matching for manipulation of the dataframe,
-change all the column names in the original dataframe to lowercase letter.
+2. To reduce the issues that accompany upper/lower case matching for manipulation of the dataframe,
+change all the column names in the original dataframe to lowercase letters.
 
 3. Reduce the number of columns (variables) that the data manipulation has to handle. Do this by selecting only the columns related to driver deaths within 1 hour of an accident in the 6 states that the analysis considers, as well as unique identification for the person, drug and alcohol test results, and timestamp information.
 
@@ -176,9 +179,9 @@ change all the column names in the original dataframe to lowercase letter.
 6. Filter down the data so that only people killed in one of 6 states is included. According to their corresponding state number codes, the states included in this analysis are: California,
 Hawaii, Illinois, New Hampshire, Rhode Island, and West Virginia. These were states that performed toxicological testing on more than 80% of their fatally injured drivers. The state column was then removed, since none of the analysis was stratified by individual state in the Brady and Li study.
 
-7. First mutate the  sex column so that any entries with a value of 9 and actually NA values, but that if the entry is not equal to 9, just keep the original entry. After this, say that the entries in this column correspond to two levels, 1 and 2, and then label these two levels as "Male" and "Female" accordingly.
+7. First mutate the  sex column so that any entries with a value of 9 are actually NA values, but that if the entry is not equal to 9, just keep the original entry. After this, say that the entries in this column correspond to two levels, 1 and 2, and then label these two levels as "Male" and "Female" accordingly.
 
-8.Replace values of greater than 94 in the alcohol results column with NA values, otherwise, divide the number in the alcohol results column by 10. After that, create a logical column that has a TRUE value if the alcohol results value is greater than 0.01. After that, delete the original alcohol results column.
+8. Replace values of greater than 94 in the alcohol results column with NA values, otherwise, divide the number in the alcohol results column by 10. After that, create a logical column that has a TRUE value if the alcohol results value is greater than 0.01. After that, delete the original alcohol results column.
 
 9. If the entry to the lag_mins column is equal to 99, replace this with a NA value, otherwise keep the original number in the column. Do this in the original column, do not create a new column.
 
