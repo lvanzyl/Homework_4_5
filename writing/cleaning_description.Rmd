@@ -26,14 +26,20 @@ The variables to use to limit the data to this subset are:
 
 To limit the years, files were only taken from the zip files for the 12 years included in the study.
 
-3. The study gives results stratified by age category, year, year category (e.g., 1999–2002), alcohol level, non-alcohol drug category, and sex. For each of these stratifications, give the variable name for the FARS variable you could use to make the split (i.e., the column name you would use in a group_by statement to create summaries within each category or the column name you would mutate to generate a categorical variable). Describe how each of these variables are coded in the data. Are there any values for missing data that you’ll need to mutate to NA values in R? Are there any cases where coding has changed over the study period?
-
 3. The variables used to stratify data in the Brady and Li paper are:
 
 - age: coded as numbers. For years 2008 and earlier, convert any 99 entries to NA. For years after 2008, 998 or 999 entries were both converted to NA
 - alc_res: measured alcohol blood level: need to convert any numbers greater than 94 to NA in the cleaning process. To get a correct alcohol level in the body, convert the number by 10, and then consider any value greater than 0.01 to mean the driver tested positive for alcohol. This will end up being a TRUE or FALSE in the test result column
 - columns contianing "drugres": coded as numbers, each of which correspond to a specific drug category. An example of how to convert is this: for numbers 100 to 295, list as a narcotic
 - sex: coded as 1 or 2 for male or female; need to convert 9 to NA in the cleaning process
+
+Note that year does not have coding within the person file, but rather the year is part of the zip file name and can be input into the dataframe through the function.
+
+```{r}
+library(purrr)
+library(tidyverse)
+```
+
 
 ```{r}
 clean_yearly_person_file <- function(year) {
@@ -172,4 +178,24 @@ Hawaii, Illinois, New Hampshire, Rhode Island, and West Virginia. These were sta
 
 7. First mutate the  sex column so that any entries with a value of 9 and actually NA values, but that if the entry is not equal to 9, just keep the original entry. After this, say that the entries in this column correspond to two levels, 1 and 2, and then label these two levels as "Male" and "Female" accordingly.
 
-7. 
+8.Replace values of greater than 94 in the alcohol results column with NA values, otherwise, divide the number in the alcohol results column by 10. After that, create a logical column that has a TRUE value if the alcohol results value is greater than 0.01. After that, delete the original alcohol results column.
+
+9. If the entry to the lag_mins column is equal to 99, replace this with a NA value, otherwise keep the original number in the column. Do this in the original column, do not create a new column.
+
+10. For years 2008 and earlier, replace 99 or 999 with NA values in the lag_hrs column, otherwise keep the original entry value for the lag_hrs. For years after 2008, replace 999 values with NA values in the lag_hrs column, otherwise keep the original entry value for the lag_hrs.
+
+11. Cut down the dataframe to only drivers that died within an hour of the accident by only keeping lag_hrs that are either less than 1 or that are equal to 1 and have lag_mins that are equal to 0. Once the dataset is reduced to this condition, remove the lag_hrs and lag_mins columns since they are no longer needed.
+
+12. For years 2008 and earlier, change entries equal to 99 to NA values, and keep all other numbers as they originally appear in the age column. For years after 2008, change entries of 998 or 999 to NA values and keep all other numbers as they originally appear in the age column. Do this within the age column, instead of adding a new column for this step.
+
+13. Create a new column that puts age into categories. Do this by creating breaks at numbers 0, 25, 45, 65, and 1000. The 1000 number in this case is just chosen as a number higher than any person could live so that anyone older than 65 would be included in this top age category. The cut function and the breaks listed create the age categories based on numbers in the age column. Labels are assigned to designate the ranges between the specified breaks. After this agecat column is created, remove the old age column from the dataset. Include.lowest = TRUE and right = FALSE means that the break values should be included in the categories of numbers, and that the interval should be closed on the left and open on the right. This means that age of (for example) 25 would included in the second grouping, not the first.
+
+14. Take each of the individual "drugres"-including columns and place them into a single column ("drug_number") with their entries listed in a column named "drug_type_raw". Test the drug_type_raw column for numbers within the ranges (eg 100 to 295 for the narcotics) and if the result is TRUE, label those as the label corresponding to that number interval in a new column named drug_type. For the first interval, replace all other entries in this new column with NA. Then, as this process is repeated for the other number intervals and corresponding new drug labels, the NAs will be replaced with the new drug label names in the drug_type column. When all labels are accounted for, change the character strings in the drug_type column to factors. When this is complete, remove the drug_number and drug_type_raw columns from the dataset.
+
+15. If both the Alchol and drug_type columns for an entry contain NA, remove those rows from the dataset. If only one of these columns has NA in it, the row remains in the dataset.
+
+16. Create a new dataset called non_missing_drugs from the gathered_df dataframe. Remove rows that have NA in the drug_type column. Group this datframe by unique_id and drug_type for the ensuing manipulations. summarise this dataframe by creating a column, "has_drug" that includes an entry for each unique id that tested positive for the drug type. Ungroup the uniqu_id and drug_type columns from this summarised table. Add a column called row_num that lists numbers 1 through the number of entries (rows) in the summarised dataframe. Take the summarised table from long form into an easier form for reading by spreading the drug_type column back into individual columns and filling in any blank spaces left by this in the has_drug column with FALSE. Remove the row_num column from the dataframe again.
+
+17. Remove all the columns containing "drugres" from the df dataframe. Join the non_missing_drugs dataframe to the df dataframe, keeping all entries from both dataframes, by the unique_id column. Remove the column "None" (pertaining to drugs) from this newly joined dataframe. Put all six drug categories into a single column labeled drug_type and put the corresponding values into a column called positive_for_drug. Turn the entries in the newly created drug_type column into factors. remove duplicate rows from the dataframe. Return this final dataframe from the year that was input into the function.
+
+18. Map the clean_yearly_person_file function to the numbers 1999 through 2010 and store this mapping to a dataframe called clean_fars. the map_df function from purrr binds the rows of the dataframes created for each of the years into a single dataframe. save this to the data folder within the working directory (where the R project is stored).
