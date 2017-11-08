@@ -46,7 +46,7 @@ clean_fars %>%
 
 Figure 1: Prevalence of nonalcohol drugs in fatally injured drivers by year and age group
 
-```{r}
+```{r fig.height = 3.25, fig.width = 6}
 # first plot
 fars_nums <- clean_fars %>%
              filter(!as.character(drug_type) %in% "Alcohol",
@@ -57,38 +57,43 @@ fars_nums <- clean_fars %>%
                        #positive_test = sum(positive_for_drug, na.rm = TRUE),
              ungroup() %>%
              group_by(year, agecat) %>%
-             summarise(perc_positive = mean(positive_test)*100)
+             summarise(perc_positive = mean(positive_test)*100) %>%
                     # round(100 * positive_test / n_non_missing, 1)) %>%
              # summarize(perc_positive = sum(perc_positive))
+             rename(Age = agecat)
 
-ggplot(fars_nums, aes(x = year, y = perc_positive, shape = agecat)) +
+ggplot(fars_nums, aes(x = year, y = perc_positive, shape = Age)) +
   geom_point() +
   geom_line()+
   theme_few() +
-  scale_y_continuous(limits = c(0, 30))
+  scale_y_continuous(limits = c(0, 30)) +
+  labs(y = "Positive for Nonalcohol Drugs, %", x = "Year")
   
 ```
 
 Figure 2: Prevalence of nonalcohol drugs in fatally injured drivers by year and drug type
 
-```{r}
+```{r fig.height = 3.25, fig.width = 6}
 # second plot
 fars_nums2 <- clean_fars %>%
              filter(!as.character(drug_type) %in% "Alcohol") %>%
              group_by(year, drug_type) %>%
              summarize(n_non_missing = sum(!is.na(positive_for_drug)),
                        positive_test = sum(positive_for_drug, na.rm = TRUE),
-                       perc_positive = round(100 * positive_test / n_non_missing, 1))
+                       perc_positive = round(100 * positive_test / n_non_missing, 1)) %>%
+             rename("Drug type" = drug_type)
 
-ggplot(fars_nums2, aes(x = year, y = perc_positive, shape = drug_type)) +
+ggplot(fars_nums2, aes(x = year, y = perc_positive, shape = `Drug type`)) +
   geom_point() +
   geom_line() +
-  theme_few()
+  theme_few() +
+  labs(y = "Positive for Drugs, %", x = "Year") +
+  scale_y_continuous(limits = c(0,12.5), breaks = c(0,4,8,12))
 ```
 
 Figure 3: Prevalence of cannabinoid drugs in fatally injured drivers by year and age group
 
-```{r}
+```{r fig.height = 3.25, fig.width = 6}
 # plot 3
 fars_nums3 <- clean_fars %>%
              filter(as.character(drug_type) %in% "Cannabinoid",
@@ -97,13 +102,15 @@ fars_nums3 <- clean_fars %>%
              # distinct(unique_id) %>%
              summarize(n_non_missing = sum(!is.na(positive_for_drug)),
                        positive_test = sum(positive_for_drug, na.rm = TRUE),
-                       perc_positive = round(100 * positive_test / n_non_missing, 1)) 
+                       perc_positive = round(100 * positive_test / n_non_missing, 1)) %>%
+             rename(Age = agecat)
 
 
-ggplot(fars_nums3, aes(x = year, y = perc_positive, shape = agecat)) +
+ggplot(fars_nums3, aes(x = year, y = perc_positive, shape = Age)) +
   geom_point() +
   geom_line() +
-  theme_few()
+  theme_few() +
+  labs(y = "Positive for Cannabinoid, %", x = "Year")
 ```
 
 Prevalence of drugs in fatally injured drivers for 1999 and 2010 by drug type
